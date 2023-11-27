@@ -16,24 +16,26 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         );
     }
 
-    for line in lines_that_contain_word {
-        println!("{}", line);
+    for (line_number, line) in lines_that_contain_word {
+        println!("line {}: {}", line_number + 1, line);
     }
 
     Ok(())
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<(usize, &'a str)> {
     contents
         .lines()
-        .filter(|line| line.contains(query))
+        .enumerate()
+        .filter(|(_, line)| line.contains(query))
         .collect()
 }
 
-pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<(usize, &'a str)> {
     contents
         .lines()
-        .filter(|line| line.to_lowercase().contains(&query.to_lowercase()))
+        .enumerate()
+        .filter(|(_, line)| line.to_lowercase().contains(&query.to_lowercase()))
         .collect()
 }
 
