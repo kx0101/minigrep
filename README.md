@@ -35,7 +35,9 @@ minigrep world sample.txt > output.txt
 The program uses the following components:
 
 - run: The main function responsible for executing the search based on the provided configurations.
-- search: Performs a case-sensitive search for the query within the file's contents, returning a vector of tuples containing line numbers and matching lines.
+- search: Performs a case-sensitive search for the query within the file's contents, returning a vector of tuples containing line numbers and matching lines. The algorithm that is being used is called [Boyer Moore](https://www.youtube.com/watch?v=PHXAOKQk2dw&ab_channel=MikeSlade)
+    - Time Complexity: Worst Case O(n * m) - Best Case O(m / n) where *m* is the length of the `query` and *n* is the length of the `contents`
+    - Space Complexity: O(k) where `k` is the space used for storing the matches.
 - search_case_insensitive: Similar to search, but performs a case-insensitive search.
 - Config: A structure that holds the query, file path, and a boolean flag to indicate whether the search should be case-insensitive.
 - Config::build: Builds the configuration based on the command-line arguments provided.
