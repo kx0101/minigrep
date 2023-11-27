@@ -22,6 +22,9 @@ minigrep hello sample.txt
 
 # Perform a case-insensitive search for the word "world" in the file "sample.txt"
 minigrep world sample.txt -i
+
+# Redirects the output to a new file. Error messages are not captured in the output file.
+minigrep world sample.txt > output.txt 
 ```
 
 ## How It Works
