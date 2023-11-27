@@ -7,11 +7,11 @@ MiniGrep is a simple command-line utility written in Rust for searching text wit
 ## Command Syntax
 
 ```bash
-minigrep [query] [file path] [-i]
+minigrep [query] [file path(s)] [-i]
 ```
 
 - query: The text string to search for within the file.
-- file path: The path to the file in which the search will be performed.
+- file path(s): The path(s) to the file(s) in which the search will be performed.
 - -i (Optional): Performs a case-insensitive search. If provided, the search will ignore the case of the query string.
 
 ## Example
@@ -19,6 +19,9 @@ minigrep [query] [file path] [-i]
 ```bash
 # Perform a case-sensitive search for the word "hello" in the file "sample.txt"
 minigrep hello sample.txt
+
+# Perform a case-sensitive search for the word "hello" in the files "sample.txt" and "sample2.txt"
+minigrep hello sample.txt sample2.txt
 
 # Perform a case-insensitive search for the word "world" in the file "sample.txt"
 minigrep world sample.txt -i
