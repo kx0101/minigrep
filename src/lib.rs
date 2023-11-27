@@ -79,7 +79,9 @@ Rust:
 safe, fast, productive.
 Pick three.";
 
-        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
+        let expected = vec![(1, "safe, fast, productive.")];
+
+        assert_eq!(expected, search(query, contents));
     }
 
     #[test]
@@ -91,8 +93,10 @@ safe, fast, productive.
 Pick three.
 Trust me.";
 
+        let expected = vec![(0, "Rust:"), (3, "Trust me.")];
+
         assert_eq!(
-            vec!["Rust:", "Trust me."],
+            expected,
             search_case_insensitive(query, contents)
         );
     }
