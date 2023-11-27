@@ -1,26 +1,45 @@
-use std::{error::Error, fs};
+use std::{error::Error, fs, thread};
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let mut handles = vec![];
+
     for file_path in &config.file_paths {
-        let contents = fs::read_to_string(file_path).expect("Failed to read file");
+        let query = config.query.clone();
+        let ignore_case = config.ignore_case;
+        let file_path = file_path.clone();
 
-        let lines_that_contain_word = if config.ignore_case {
-            search_case_insensitive(&config.query, &contents)
-        } else {
-            search(&config.query, &contents)
-        };
+        let handle = thread::spawn(move || {
+            if let Ok(contents) = fs::read_to_string(&file_path) {
 
-        if lines_that_contain_word.is_empty() {
-            println!(
-                "Couldn't find the word {} in the file {}",
-                &config.query, file_path
-            );
-        }
+                let lines_that_contain_word = if ignore_case {
+                    search_case_insensitive(&query, &contents)
+                } else {
+                    search(&query, &contents)
+                };
 
-        println!("\n\nFile: {}", file_path);
-        for (line_number, line) in lines_that_contain_word {
-            println!("line {}: {}", line_number + 1, line);
-        }
+                println!("\nFile: {}", &file_path);
+
+                if lines_that_contain_word.is_empty() {
+                    println!(
+                        "Couldn't find the word '{}' in the file '{}'",
+                        &query, &file_path
+                    );
+                }
+
+                for (line_number, line) in lines_that_contain_word {
+                    println!("Line {}: {}", line_number + 1, line);
+                }
+
+            } else {
+                eprintln!("Failed to read file: {}", &file_path);
+            }
+        });
+
+        handles.push(handle);
+    }
+
+    for handle in handles {
+        handle.join().expect("Failed to join thread");
     }
 
     Ok(())
@@ -69,6 +88,7 @@ pub fn search(query: &str, contents: &str) -> Vec<(usize, String)> {
     matches
 }
 
+#[derive(Clone)]
 pub struct Config {
     pub query: String,
     pub file_paths: Vec<String>,
