@@ -42,6 +42,8 @@ The program uses the following components:
 - Config: A structure that holds the query, file path, and a boolean flag to indicate whether the search should be case-insensitive.
 - Config::build: Builds the configuration based on the command-line arguments provided.
 
+The program utilizes multiple threads for concurrent file processing to enhance search speed when searching in multiple files. Each file search operation runs in its own thread.
+
 ## Running Tests
 
 ```bash
