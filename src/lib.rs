@@ -1,38 +1,21 @@
-use std::{error::Error, fs, thread};
+mod utils;
+
+use std::sync::{Arc, Mutex};
+use std::{error::Error, thread};
+use utils::{parse_arguments, process_file};
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let mut handles = vec![];
+    let output = Arc::new(Mutex::new(()));
 
     for file_path in &config.file_paths {
         let query = config.query.clone();
         let ignore_case = config.ignore_case;
         let file_path = file_path.clone();
+        let output_mutex = Arc::clone(&output);
 
         let handle = thread::spawn(move || {
-            if let Ok(contents) = fs::read_to_string(&file_path) {
-
-                let lines_that_contain_word = if ignore_case {
-                    search_case_insensitive(&query, &contents)
-                } else {
-                    search(&query, &contents)
-                };
-
-                println!("\nFile: {}", &file_path);
-
-                if lines_that_contain_word.is_empty() {
-                    println!(
-                        "Couldn't find the word '{}' in the file '{}'",
-                        &query, &file_path
-                    );
-                }
-
-                for (line_number, line) in lines_that_contain_word {
-                    println!("Line {}: {}", line_number + 1, line);
-                }
-
-            } else {
-                eprintln!("Failed to read file: {}", &file_path);
-            }
+            process_file(&file_path, &query, ignore_case, &output_mutex);
         });
 
         handles.push(handle);
@@ -97,25 +80,15 @@ pub struct Config {
 
 impl Config {
     pub fn build(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("Usage: [query] [file path(s)] \n\n Optional arguments: \n\n -i \t Case insensitive search");
+        if args.len() < 2 {
+            return Err("Usage: [query] [file path(s) or . for current directory] \n\n Optional arguments: \n\n -i \t Case insensitive search");
         }
 
-        let query = &args[1];
-        let mut file_paths = args[2..].to_vec();
-        let mut ignore_case = false;
-
-        if let Some(index) = args.iter().position(|arg| arg == "-i") {
-            ignore_case = true;
-            file_paths.remove(index - 2);
-        }
-
-        if args.iter().any(|arg| arg == "-i") {
-            ignore_case = true;
-        }
+        let query = args[1].clone();
+        let (file_paths, ignore_case) = parse_arguments(&args[2..]).unwrap_or((vec![], false));
 
         Ok(Config {
-            query: query.to_string(),
+            query,
             file_paths,
             ignore_case,
         })
@@ -155,7 +128,7 @@ Trust me.";
 
     #[test]
     fn build_config_too_few_args() {
-        let args = vec!["minigrep".to_string(), "query".to_string()];
+        let args = vec!["minigrep".to_string()];
 
         let config = Config::build(&args);
 

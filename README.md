@@ -11,7 +11,7 @@ minigrep [query] [file path(s)] [-i]
 ```
 
 - query: The text string to search for within the file.
-- file path(s): The path(s) to the file(s) in which the search will be performed separated by a comma.
+- file path(s): The path(s) to the file(s) in which the search will be performed separated by a comma. You can also use "." to search within the current directory.
 - -i (Optional): Performs a case-insensitive search. If provided, the search will ignore the case of the query string.
 
 ## Example
@@ -22,6 +22,9 @@ minigrep hello sample.txt
 
 # Perform a case-sensitive search for the word "hello" in the files "sample.txt" and "sample2.txt"
 minigrep hello sample.txt sample2.txt
+
+# Perform a case-sensitive search for the word "hello" in all the files in your current directory.
+minigrep hello .
 
 # Perform a case-insensitive search for the word "world" in the file "sample.txt"
 minigrep world sample.txt -i
