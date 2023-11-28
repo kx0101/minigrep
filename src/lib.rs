@@ -1,29 +1,21 @@
 mod utils;
 
 use std::sync::{Arc, Mutex};
-use std::{error::Error, thread};
+use std::error::Error;
 use utils::{parse_arguments, process_file};
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let mut handles = vec![];
     let output = Arc::new(Mutex::new(()));
+    let query = config.query;
+    let ignore_case = config.ignore_case;
 
-    for file_path in &config.file_paths {
-        let query = config.query.clone();
-        let ignore_case = config.ignore_case;
-        let file_path = file_path.clone();
-        let output_mutex = Arc::clone(&output);
-
-        let handle = thread::spawn(move || {
-            process_file(&file_path, &query, ignore_case, &output_mutex);
-        });
-
-        handles.push(handle);
-    }
-
-    for handle in handles {
-        handle.join().expect("Failed to join thread");
-    }
+    std::thread::scope(|scope| {
+        for file_path in &config.file_paths {
+            scope.spawn(|| {
+                process_file(&file_path.clone(), &query, ignore_case, &output);
+            });
+        }
+    });
 
     Ok(())
 }

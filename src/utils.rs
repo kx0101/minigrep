@@ -7,7 +7,7 @@ pub fn process_file(
     file_path: &String,
     query: &String,
     ignore_case: bool,
-    output_mutex: &Arc<Mutex<()>>,
+    output: &Arc<Mutex<()>>,
 ) {
     if let Ok(contents) = fs::read_to_string(file_path) {
         let lines_that_contain_word = if ignore_case {
@@ -16,7 +16,7 @@ pub fn process_file(
             search(query, &contents)
         };
 
-        print_file_results(file_path, query, &lines_that_contain_word, output_mutex);
+        print_file_results(file_path, query, &lines_that_contain_word, output);
     }
 }
 
@@ -24,9 +24,9 @@ fn print_file_results(
     file_path: &String,
     query: &String,
     lines: &[(usize, String)],
-    output_mutex: &Arc<Mutex<()>>,
+    output: &Arc<Mutex<()>>,
 ) {
-    let _guard = output_mutex.lock().unwrap();
+    let _guard = output.lock().unwrap();
     println!("\n\x1b[0;32mFile: {}\x1b[0m", file_path);
 
     if lines.is_empty() {
