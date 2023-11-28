@@ -1,0 +1,8 @@
+Elapsed time: 0.000011 for regular search
+Elapsed time: 0.000107 for regular search
+Elapsed time: 0.000073 for regular search
+Elapsed time: 0.000016 for regular search
+Elapsed time: 0.000020 for regular search
+Elapsed time: 0.000012 for regular search
+Elapsed time: 0.000006 for regular search
+Elapsed time: 0.006749 for regular search

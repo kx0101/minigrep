@@ -2,6 +2,7 @@ mod utils;
 
 use std::error::Error;
 use std::sync::{Arc, Mutex};
+use std::time::Instant;
 use utils::{parse_arguments, process_file};
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
@@ -24,34 +25,37 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn search<'a>(query: &str, contents: &'a str, case_insensitive: bool) -> Vec<(usize, &'a str)> {
+    let start = Instant::now();
+
     let mut matches: Vec<(usize, &str)> = Vec::new();
     let n = contents.len();
     let m = query.len();
     let mut skip_table = [m; 256];
 
     let cmp = if case_insensitive {
-        |a: char, b: char| a.eq_ignore_ascii_case(&b)
+        |a: u8, b: u8| a.eq_ignore_ascii_case(&b)
     } else {
-        |a: char, b: char| a == b
+        |a: u8, b: u8| a == b
     };
 
     for (i, &c) in query.as_bytes().iter().enumerate().take(m - 1) {
         skip_table[c as usize] = m - i - 1;
     }
 
-    let contents_chars = contents.chars().collect::<Vec<char>>();
+    let contents_bytes = contents.as_bytes();
+    let query_bytes = query.as_bytes();
 
     let mut i = 0;
     while i <= n - m {
         let mut j = m - 1;
 
-        while cmp(query.chars().nth(j).unwrap(), contents_chars[i + j]) {
+        while cmp(query_bytes[j], contents_bytes[i + j]) {
             if j == 0 {
                 let line_start = contents[..i].rfind('\n').map_or(0, |pos| pos + 1);
                 let line_end = contents[i..].find('\n').map_or(n, |pos| i + pos);
 
                 matches.push((
-                    contents[..i].lines().count(),
+                    contents[..i].matches('\n').count(),
                     &contents[line_start..line_end],
                 ));
 
@@ -61,11 +65,63 @@ pub fn search<'a>(query: &str, contents: &'a str, case_insensitive: bool) -> Vec
             j -= 1;
         }
 
-        i += skip_table[contents.as_bytes()[i + m - 1] as usize];
+        i += skip_table[contents_bytes[i + m - 1] as usize];
     }
+
+    let elapsed_time = Instant::now() - start;
+    println!(
+        "Elapsed time: {:.6} for {} search",
+        elapsed_time.as_secs_f64() + elapsed_time.subsec_micros() as f64 * 1e-6,
+        if case_insensitive { "case_insensitive" } else { "regular" }
+    );
 
     matches
 }
+
+// pub fn search<'a>(query: &str, contents: &'a str, case_insensitive: bool) -> Vec<(usize, &'a str)> {
+//     let mut matches: Vec<(usize, &str)> = Vec::new();
+//     let n = contents.len();
+//     let m = query.len();
+//     let mut skip_table = [m; 256];
+//
+//     let cmp = if case_insensitive {
+//         |a: u8, b: u8| a.eq_ignore_ascii_case(&b)
+//     } else {
+//         |a: u8, b: u8| a == b
+//     };
+//
+//     for (i, &c) in query.as_bytes().iter().enumerate().take(m - 1) {
+//         skip_table[c as usize] = m - i - 1;
+//     }
+//
+//     let mut i = 0;
+//     while i <= n - m {
+//         let mut j = m - 1;
+//
+//         let query = query.as_bytes();
+//         let contents = contents.as_bytes();
+//
+//         while cmp(query[j], contents[i + j]) {
+//             if j == 0 {
+//                 let line_start = contents[..i].rfind('\n').map_or(0, |pos| pos + 1);
+//                 let line_end = contents[i..].find('\n').map_or(n, |pos| i + pos);
+//
+//                 matches.push((
+//                     contents[..i].matches('\n').count(),
+//                     &contents[line_start..line_end],
+//                 ));
+//
+//                 break;
+//             }
+//
+//             j -= 1;
+//         }
+//
+//         i += skip_table[contents[i + m - 1] as usize];
+//     }
+//
+//     matches
+// }
 
 #[derive(Clone)]
 pub struct Config {

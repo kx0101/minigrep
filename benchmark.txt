@@ -1,0 +1,20 @@
+Improvements
+
+Elapsed time: 0.000007 for case_insensitive search
+Elapsed time: 0.000012 for case_insensitive search
+Elapsed time: 0.000007 for case_insensitive search
+Elapsed time: 0.000187 for case_insensitive search
+Elapsed time: 0.000002 for case_insensitive search
+Elapsed time: 0.000050 for case_insensitive search
+Elapsed time: 0.008374 for case_insensitive search
+
+Elapsed time: 0.000011 for regular search
+Elapsed time: 0.000107 for regular search
+Elapsed time: 0.000073 for regular search
+Elapsed time: 0.000016 for regular search
+Elapsed time: 0.000020 for regular search
+Elapsed time: 0.000012 for regular search
+Elapsed time: 0.000006 for regular search
+Elapsed time: 0.006749 for regular search
+
+First solution
