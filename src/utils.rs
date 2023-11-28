@@ -1,7 +1,9 @@
+use std::{
+    fs,
+    sync::{Arc, Mutex}, ffi::OsString, io,
+};
 
-use std::{sync::{Mutex, Arc}, fs};
-
-use crate::{search_case_insensitive, search};
+use crate::{search, search_case_insensitive};
 
 pub fn process_file(
     file_path: &String,
@@ -41,11 +43,11 @@ fn print_file_results(
     }
 }
 
-fn read_current_directory_files() -> Result<Vec<String>, std::io::Error> {
+fn read_current_directory_files() -> Result<Vec<OsString>, io::Error> {
     let entries = std::fs::read_dir(".")?;
     let file_paths = entries
         .filter_map(|entry| entry.ok())
-        .filter_map(|entry| entry.file_name().to_str().map(String::from))
+        .map(|entry| entry.file_name())
         .collect();
 
     Ok(file_paths)
@@ -60,9 +62,13 @@ pub fn parse_arguments(args: &[String]) -> Result<(Vec<String>, bool), &'static 
             "-i" => ignore_case = true,
             "." => {
                 if let Ok(paths) = read_current_directory_files() {
-                    file_paths.extend_from_slice(paths.as_slice());
-                } else {
-                    return Err("Failed to read the current directory");
+                    for path in paths {
+                        if let Some(file_path) = path.to_str() {
+                            file_paths.push(file_path.to_string());
+                        } else {
+                            return Err("Failed to convert file path to string");
+                        }
+                    }
                 }
             }
             _ => file_paths.push(arg.clone()),
