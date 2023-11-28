@@ -1,62 +1,58 @@
 mod utils;
 
+use std::error::Error;
 use std::sync::{Arc, Mutex};
-use std::{error::Error, thread};
 use utils::{parse_arguments, process_file};
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let mut handles = vec![];
     let output = Arc::new(Mutex::new(()));
+    let query = config.query;
 
-    for file_path in &config.file_paths {
-        let query = config.query.clone();
-        let ignore_case = config.ignore_case;
-        let file_path = file_path.clone();
-        let output_mutex = Arc::clone(&output);
+    std::thread::scope(|scope| {
+        for file_path in &config.file_paths {
+            scope.spawn(|| {
+                let ignore_case = config.ignore_case;
+                let file_path = file_path.clone();
+                let output_mutex = Arc::clone(&output);
 
-        let handle = thread::spawn(move || {
-            process_file(&file_path, &query, ignore_case, &output_mutex);
-        });
-
-        handles.push(handle);
-    }
-
-    for handle in handles {
-        handle.join().expect("Failed to join thread");
-    }
+                process_file(&file_path, &query, ignore_case, &output_mutex);
+            });
+        }
+    });
 
     Ok(())
 }
 
-pub fn search_case_insensitive(query: &str, contents: &str) -> Vec<(usize, String)> {
-    let query = query.to_lowercase();
-    let contents = contents.to_lowercase();
-
-    search(&query, &contents)
-}
-
-pub fn search(query: &str, contents: &str) -> Vec<(usize, String)> {
-    let mut matches = Vec::new();
+pub fn search<'a>(query: &str, contents: &'a str, case_insensitive: bool) -> Vec<(usize, &'a str)> {
+    let mut matches: Vec<(usize, &str)> = Vec::new();
     let n = contents.len();
     let m = query.len();
     let mut skip_table = [m; 256];
+
+    let cmp = if case_insensitive {
+        |a: char, b: char| a.eq_ignore_ascii_case(&b)
+    } else {
+        |a: char, b: char| a == b
+    };
 
     for (i, &c) in query.as_bytes().iter().enumerate().take(m - 1) {
         skip_table[c as usize] = m - i - 1;
     }
 
+    let contents_chars = contents.chars().collect::<Vec<char>>();
+
     let mut i = 0;
     while i <= n - m {
         let mut j = m - 1;
 
-        while query.as_bytes()[j] == contents.as_bytes()[i + j] {
+        while cmp(query.chars().nth(j).unwrap(), contents_chars[i + j]) {
             if j == 0 {
                 let line_start = contents[..i].rfind('\n').map_or(0, |pos| pos + 1);
                 let line_end = contents[i..].find('\n').map_or(n, |pos| i + pos);
 
                 matches.push((
-                    contents[..i].matches('\n').count(),
-                    contents[line_start..line_end].to_string(),
+                    contents[..i].lines().count(),
+                    &contents[line_start..line_end],
                 ));
 
                 break;
@@ -107,9 +103,9 @@ Rust:
 safe, fast, productive.
 Pick three.";
 
-        let expected = vec![(1, String::from("safe, fast, productive."))];
+        let expected = vec![(1, ("safe, fast, productive."))];
 
-        assert_eq!(expected, search(query, contents));
+        assert_eq!(expected, search(query, contents, false));
     }
 
     #[test]
@@ -121,9 +117,9 @@ safe, fast, productive.
 Pick three.
 Trust me.";
 
-        let expected = vec![(0, String::from("rust:")), (3, String::from("trust me."))];
+        let expected = vec![(0, ("rust:")), (3, ("trust me."))];
 
-        assert_eq!(expected, search_case_insensitive(query, contents));
+        assert_eq!(expected, search(query, contents, true));
     }
 
     #[test]

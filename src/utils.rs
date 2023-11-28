@@ -1,7 +1,12 @@
+use std::{
+    fs,
+    sync::{Arc, Mutex},
+};
 
-use std::{sync::{Mutex, Arc}, fs};
+use std::ffi::OsString;
+use std::io;
 
-use crate::{search_case_insensitive, search};
+use crate::search;
 
 pub fn process_file(
     file_path: &String,
@@ -11,9 +16,9 @@ pub fn process_file(
 ) {
     if let Ok(contents) = fs::read_to_string(file_path) {
         let lines_that_contain_word = if ignore_case {
-            search_case_insensitive(query, &contents)
+            search(query, &contents, false)
         } else {
-            search(query, &contents)
+            search(query, &contents, true)
         };
 
         print_file_results(file_path, query, &lines_that_contain_word, output_mutex);
@@ -23,7 +28,7 @@ pub fn process_file(
 fn print_file_results(
     file_path: &String,
     query: &String,
-    lines: &[(usize, String)],
+    lines: &[(usize, &str)],
     output_mutex: &Arc<Mutex<()>>,
 ) {
     let _guard = output_mutex.lock().unwrap();
@@ -41,11 +46,11 @@ fn print_file_results(
     }
 }
 
-fn read_current_directory_files() -> Result<Vec<String>, std::io::Error> {
+fn read_current_directory_files() -> Result<Vec<OsString>, io::Error> {
     let entries = std::fs::read_dir(".")?;
     let file_paths = entries
         .filter_map(|entry| entry.ok())
-        .filter_map(|entry| entry.file_name().to_str().map(String::from))
+        .map(|entry| entry.file_name())
         .collect();
 
     Ok(file_paths)
@@ -60,9 +65,13 @@ pub fn parse_arguments(args: &[String]) -> Result<(Vec<String>, bool), &'static 
             "-i" => ignore_case = true,
             "." => {
                 if let Ok(paths) = read_current_directory_files() {
-                    file_paths.extend_from_slice(paths.as_slice());
-                } else {
-                    return Err("Failed to read the current directory");
+                    for path in paths {
+                        if let Some(file_path) = path.to_str() {
+                            file_paths.push(file_path.to_string());
+                        } else {
+                            return Err("Failed to convert file path to string");
+                        }
+                    }
                 }
             }
             _ => file_paths.push(arg.clone()),
