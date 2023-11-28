@@ -56,3 +56,9 @@ cargo test
 ## Notes
 The program will display lines containing the query string along with their line numbers within the specified file.
 If no matching lines are found, it will indicate that the query was not found in the file.
+
+## Boyer Moore
+
+[Boyer Moore](https://www.youtube.com/watch?v=PHXAOKQk2dw&ab_channel=MikeSlade)
+
+![Boyer-Moore](/Boyer-Moore.png)
