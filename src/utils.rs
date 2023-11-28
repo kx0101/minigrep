@@ -1,6 +1,7 @@
 use std::{
-    fs,
-    sync::{Arc, Mutex}, ffi::OsString, io,
+    ffi::OsString,
+    fs, io,
+    sync::{Arc, Mutex},
 };
 
 use crate::{search, search_case_insensitive};
