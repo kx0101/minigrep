@@ -18,3 +18,21 @@ Elapsed time: 0.000006 for regular search
 Elapsed time: 0.006749 for regular search
 
 First solution
+
+Elapsed time: 0.000006 for case_insensitive search
+Elapsed time: 0.000017 for case_insensitive search
+Elapsed time: 0.000131 for case_insensitive search
+Elapsed time: 0.000136 for case_insensitive search
+Elapsed time: 0.000005 for case_insensitive search
+Elapsed time: 0.000002 for case_insensitive search
+Elapsed time: 0.000003 for case_insensitive search
+Elapsed time: 0.004598 for case_insensitive search
+
+Elapsed time: 0.000005 for regular search
+Elapsed time: 0.000015 for regular search
+Elapsed time: 0.000092 for regular search
+Elapsed time: 0.000007 for regular search
+Elapsed time: 0.000008 for regular search
+Elapsed time: 0.000004 for regular search
+Elapsed time: 0.000112 for regular search
+Elapsed time: 0.004788 for regular search
