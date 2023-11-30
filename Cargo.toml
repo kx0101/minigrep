@@ -10,7 +10,6 @@ documentation = "https://github.com/kx0101/minigrep"
 readme = "README.md"
 homepage = "https://www.elijah.koulaxis.com"
 repository = "https://github.com/kx0101/minigrep"
-license = "MIT"
 keywords = ["cli", "linux", "grep"]
 categories = ["CLI", "grep"]
 
