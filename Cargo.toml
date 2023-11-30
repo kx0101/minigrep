@@ -1,6 +1,6 @@
 [package]
 name = "minigrep_elijahkx"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Elijah Koulaxis <liakos.koulaxis@yahoo.com>"]
 license = "MIT"
@@ -8,7 +8,7 @@ rust-version = "1.72.0"
 description = "MiniGrep is a Rust-based command-line tool, with a (current) size of 588KB that lets users search files for a given query string and shows matching lines with their line numbers."
 documentation = "https://github.com/kx0101/minigrep"
 readme = "README.md"
-homepage = "https://www.elijah.koulaxis.com"
+homepage = "https://www.elijahkoulaxis.com"
 repository = "https://github.com/kx0101/minigrep"
 keywords = ["cli", "linux", "grep"]
 categories = ["CLI", "grep"]
