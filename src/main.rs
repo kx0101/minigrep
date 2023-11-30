@@ -1,6 +1,6 @@
 use std::{env::args, time::Instant};
 
-use minigrep::Config;
+use minigrep_elijahkx::Config;
 
 fn main() {
     let args: Vec<String> = args().collect();
@@ -9,7 +9,7 @@ fn main() {
 
     let config = Config::build(&args).expect("Problem parsing arguments: {err}");
 
-    minigrep::run(config).expect("Application error: {e}");
+    minigrep_elijahkx::run(config).expect("Application error: {e}");
 
     let elapsed_time = Instant::now() - start;
     println!(
